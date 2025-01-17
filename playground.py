@@ -9,10 +9,7 @@ from collections import Counter
 from nltk.corpus import stopwords
 
 stop_words = set(stopwords.words("english"))
-
-
-
-
+database: List[Tuple[str, str]] = database
 
 
 def bad_or_good_grams() -> None:
@@ -23,43 +20,63 @@ def bad_or_good_grams() -> None:
         words: List[str] = tokenize(phrase)
         for word in words:
             if word not in stop_words:
-                if feeling == 'good':
+                if feeling == "good":
                     good_counter.update([word])
-                elif feeling == 'bad':
+                elif feeling == "bad":
                     bad_counter.update([word])
-        
 
-    def rank_words(good_counter:  Counter[str] , bad_counter:  Counter[str] ) ->  List[Tuple[str, int]]:
+    def rank_words(
+        good_counter: Counter[str], bad_counter: Counter[str]
+    ) -> List[Tuple[str, int]]:
         word_scores = {}
-        
+
         all_words = set(good_counter.keys()).union(set(bad_counter.keys()))
-        
+
         for word in all_words:
             good_count = good_counter.get(word, 0)
             bad_count = bad_counter.get(word, 0)
-            score = good_count - bad_count 
+            score = good_count - bad_count
             word_scores[word] = score
-        
-        
-        ranked_words: List[Tuple[str, int]] = sorted(word_scores.items(), key=lambda x: x[1], reverse=True)
-        
-        return ranked_words
 
+        ranked_words: List[Tuple[str, int]] = sorted(
+            word_scores.items(), key=lambda x: x[1], reverse=True
+        )
+
+        return ranked_words
 
     ranked_words = rank_words(good_counter, bad_counter)
 
     for word, score in ranked_words:
-        feeling = 'good' if score > 0 else 'bad' if score < 0 else 'neutral'
+        feeling = "good" if score > 0 else "bad" if score < 0 else "neutral"
         print(f"('{word}', '{score}'), ")
 
 
+def get_bigrams_list(words: List[str]) -> List[Tuple[str, str]]:
+    bigrams: List[Tuple[str, str]] = list(ngrams(words, 2))
+    return bigrams
 
 
+def get_trigrams_list(words: List[str]) -> List[Tuple[str, str, str]]:
+    trigrams: List[Tuple[str, str, str]] = list(ngrams(words, 3))
+    return trigrams
 
+
+def get_unigrams_tuple(words: List[str]) -> Tuple[Tuple[str]]:
+    unigrams: Tuple[Tuple[str]] = tuple(ngrams(words, 1))
+    return unigrams
+
+
+def get_bigrams_tuple(words: List[str]) -> Tuple[Tuple[str, str]]:
+    bigrams: Tuple[Tuple[str, str]] = tuple(ngrams(words, 2))
+    return bigrams
+
+
+def get_trigrams_tuple(words: List[str]) -> Tuple[Tuple[str, str, str]]:
+    trigrams: Tuple[Tuple[str, str, str]] = tuple(ngrams(words, 3))
+    return trigrams
 
 
 big_str_test = str(database)
-
 
 
 def get_words_list(database: List[Tuple[str, str]]) -> List[str]:
@@ -83,13 +100,15 @@ def get_words_set(database: List[Tuple[str, str]]) -> set[str]:
             words_set.add(word)
     return words_set
 
+
 def text_preprocessing(text: str) -> List[str]:
     text = text.lower()
-    text = text.translate(str.maketrans('', '', string.punctuation))
-    tokens = word_tokenize(text)  
+    text = text.translate(str.maketrans("", "", string.punctuation))
+    tokens = word_tokenize(text)
     token_list = [token for token in tokens]
 
     return token_list
+
 
 def tokenize(text: str) -> List[str]:
     text = text.lower()
@@ -97,6 +116,102 @@ def tokenize(text: str) -> List[str]:
     tokens = text.split()
 
     return tokens
+
+
+def get_unigrams_list(words: List[str]) -> List[Tuple[str]]:
+    unigrams: List[Tuple[str]] = []
+    for word in words:
+        unigrams.append((word,))
+    return unigrams
+
+
+def unigrams_score(database: List[Tuple[str, str]]) -> List[Tuple[Tuple[str], int]]:
+    good_counter: Counter[Tuple[str]] = Counter()
+    bad_counter: Counter[Tuple[str]] = Counter()
+
+    for phrase, feeling in database:
+        unigrams: List[Tuple[str]] = get_unigrams_list(tokenize(phrase))
+        for gram in unigrams:
+            if gram[0] not in stop_words:
+                if feeling == "good":
+                    good_counter.update([gram])
+                elif feeling == "bad":
+                    bad_counter.update([gram])
+
+    word_scores = {}
+
+    all_words = set(good_counter.keys()).union(set(bad_counter.keys()))
+
+    for word in all_words:
+        good_count = good_counter.get(word, 0)
+        bad_count = bad_counter.get(word, 0)
+        score = good_count - bad_count
+        word_scores[word] = score
+
+    ranked_words: List[Tuple[Tuple[str], int]] = sorted(
+        word_scores.items(), key=lambda x: x[1], reverse=True
+    )
+
+    return ranked_words
+
+
+def bigrams_score(database: List[Tuple[str, str]]) -> List[Tuple[Tuple[str,str], int]]:
+    good_counter: Counter[Tuple[str,str]] = Counter()
+    bad_counter: Counter[Tuple[str,str]] = Counter()
+
+    for phrase, feeling in database:
+        bigrams: List[Tuple[str,str]] = get_bigrams_list(tokenize(phrase))
+        for grams in bigrams:
+                if feeling == "good":
+                    good_counter.update([grams])
+                elif feeling == "bad":
+                    bad_counter.update([grams])
+
+    word_scores = {}
+
+    all_words = set(good_counter.keys()).union(set(bad_counter.keys()))
+
+    for word in all_words:
+        good_count = good_counter.get(word, 0)
+        bad_count = bad_counter.get(word, 0)
+        score = good_count - bad_count
+        word_scores[word] = score
+
+    ranked_words: List[Tuple[Tuple[str,str], int]] = sorted(
+        word_scores.items(), key=lambda x: x[1], reverse=True
+    )
+
+    return ranked_words
+
+def trigrams_score(database: List[Tuple[str, str]]) -> List[Tuple[Tuple[str,str, str], int]]:
+    good_counter: Counter[Tuple[str,str,str]] = Counter()
+    bad_counter: Counter[Tuple[str,str,str]] = Counter()
+
+    for phrase, feeling in database:
+        trigrams: List[Tuple[str,str,str]] = get_trigrams_list(tokenize(phrase))
+        for grams in trigrams:
+                if feeling == "good":
+                    good_counter.update([grams])
+                elif feeling == "bad":
+                    bad_counter.update([grams])
+
+    word_scores = {}
+
+    all_words = set(good_counter.keys()).union(set(bad_counter.keys()))
+
+    for word in all_words:
+        good_count = good_counter.get(word, 0)
+        bad_count = bad_counter.get(word, 0)
+        score = good_count - bad_count
+        word_scores[word] = score
+
+    ranked_words: List[Tuple[Tuple[str,str,str], int]] = sorted(
+        word_scores.items(), key=lambda x: x[1], reverse=True
+    )
+
+    return ranked_words
+
+print(trigrams_score(database))
 # -------------------------------------------
 
 
@@ -131,5 +246,3 @@ print("---------------------")
 # print(get_bigrams_tuple(get_words_list(database)))
 # print("---------------------")
 # print(get_trigrams_tuple(get_words_list(database)))
-
-bad_or_good_grams()
