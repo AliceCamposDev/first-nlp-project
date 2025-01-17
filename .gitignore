@@ -1,2 +1,9 @@
 /__pycache__
 /.venv
+
+*.c
+.vscode
+.mypy_cache
+awawwawawa
+build
+database.txt

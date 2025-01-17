@@ -1,7 +1,7 @@
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-from data_base import data_base
+from database import database
 
 from typing import List, Tuple, Dict, Set
 
@@ -9,9 +9,9 @@ stemmer = PorterStemmer()
 stop_words = set(stopwords.words("english"))
 
 
-def stem(data_base: List[Tuple[str, str]]) -> List[Tuple[list[str], str]]:
+def stem(database: List[Tuple[str, str]]) -> List[Tuple[list[str], str]]:
     stemmed_data: List[Tuple[list[str], str]] = []
-    for phrase, category in data_base:
+    for phrase, category in database:
         stemmed_phrases: List[str] = [
             stemmer.stem(word)
             for word in phrase.split()
@@ -42,7 +42,7 @@ def create_feature_set(
     return features
 
 
-stemmed_data: List[Tuple[list[str], str]] = stem(data_base)
+stemmed_data: List[Tuple[list[str], str]] = stem(database)
 features: List[Tuple[Dict[str, bool], str]] = create_feature_set(stemmed_data)
 classifier = nltk.NaiveBayesClassifier.train(features)
 
