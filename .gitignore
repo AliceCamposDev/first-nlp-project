@@ -1,5 +1,6 @@
 /__pycache__
 /.venv
+.conda
 
 *.c
 .vscode
@@ -7,3 +8,6 @@
 awawwawawa
 build
 database.txt
+*.o
+*.exe
+*.h
